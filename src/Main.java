@@ -2,7 +2,9 @@ import co.generation.clinica.datos.DatosCSV;
 import co.generation.clinica.model.*;
 import co.generation.clinica.service.ClinicaService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -67,6 +69,52 @@ public class Main {
                     }
                     break;
 
+                case 4: // Listar turnos del día
+                    System.out.print("Año (YYYY): "); int a4 = sc.nextInt();
+                    System.out.print("Mes (1-12): "); int m4 = sc.nextInt();
+                    System.out.print("Día: "); int d4 = sc.nextInt();
+                    LocalDate fechaBusqueda = LocalDate.of(a4, m4, d4);
+
+                    List<Turno> turnosDia = servicio.listarTurnosDelDia(fechaBusqueda);
+                    if(turnosDia.isEmpty()) System.out.println("No hay turnos para esa fecha.");
+                    else turnosDia.forEach(System.out::println);
+                    break;
+
+                case 5: // Cancelar turno
+                    System.out.print("ID del turno a cancelar: ");
+                    int idCanc = sc.nextInt();
+                    servicio.cancelarTurno(idCanc);
+                    break;
+
+                case 6: // Ver turnos por médico
+                    System.out.print("Nombre del médico: "); String n6 = sc.nextLine();
+                    System.out.print("Apellido del médico: "); String a6 = sc.nextLine();
+                    Medico med6 = servicio.buscarPorNombreApellido(n6, a6);
+                    if(med6 != null) {
+                        servicio.buscarPorMedico(med6).forEach(System.out::println);
+                    } else {
+                        System.out.println("Médico no encontrado.");
+                    }
+                    break;
+
+                case 7: // Ver turnos por paciente
+                    System.out.print("Cédula del paciente: ");
+                    Paciente pac7 = servicio.buscarPorCedula(sc.nextLine());
+                    if(pac7 != null) {
+                        servicio.buscarPorPaciente(pac7).forEach(System.out::println);
+                    } else {
+                        System.out.println("Paciente no encontrado.");
+                    }
+                    break;
+
+                case 8: // Cambiar estado de turno
+                    System.out.print("ID del turno: "); int id8 = sc.nextInt();
+                    System.out.println("Nuevos estados: PENDIENTE, ATENDIDO, CANCELADO");
+                    System.out.print("Nuevo estado: ");
+                    String est8 = sc.next().toUpperCase();
+                    servicio.cambiarEstadoTurno(id8, EstadoTurno.valueOf(est8));
+                    break;
+
                 case 9:
                     servicio.listarPacientes();
                     break;
@@ -77,7 +125,6 @@ public class Main {
                 case 11:
                     servicio.generarReporteHTML();
                     break;
-
 
                 case 0:
                     // PASO 2: GUARDAR DATOS AL SALIR
