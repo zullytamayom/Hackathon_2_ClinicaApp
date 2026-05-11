@@ -238,61 +238,43 @@ public class ClinicaService implements Consultable {
     }
 
     public void generarReporteHTML() {
-        // El archivo se creará en la raíz de tu proyecto
-        File archivo = new File("reporte_clinica.html");
+        File archivo = new File("reporte_clinica_completo.html");
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(archivo))) {
-            // --- CABECERA Y ESTILOS ---
-            writer.println("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'>");
-            writer.println("<title>Sistema ClinicaApp - Reporte Maestro</title>");
-            writer.println("<style>");
-            writer.println("body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f0f2f5; }");
-            writer.println(".container { background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }");
-            writer.println("h1 { color: #1a73e8; text-align: center; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }");
-            writer.println("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
-            writer.println("th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: left; }");
-            writer.println("th { background-color: #1a73e8; color: white; }");
-            writer.println("tr:nth-child(even) { background-color: #f8f9fa; }");
-            writer.println(".status-pill { padding: 4px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold; }");
-            writer.println(".PENDIENTE { background-color: #fff3cd; color: #856404; }");
-            writer.println(".ATENDIDO { background-color: #d4edda; color: #155724; }");
-            writer.println(".CANCELADO { background-color: #f8d7da; color: #721c24; }");
-            writer.println("</style></head><body>");
+            writer.println("<html><head><meta charset='UTF-8'><title>Reporte Maestro ClinicaApp</title>");
+            writer.println("<style>body{font-family:sans-serif; margin:40px; background:#f4f4f4;} .card{background:white; padding:20px; margin-bottom:30px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);} table{width:100%; border-collapse:collapse;} th,td{padding:10px; border:1px solid #ddd; text-align:left;} th{background:#3498db; color:white;} h2{color:#2980b9; border-bottom:2px solid #2980b9;}</style></head><body>");
 
-            writer.println("<div class='container'>");
-            writer.println("<h1>📋 Reporte General de Turnos Médicos</h1>");
-            writer.println("<p align='right'><i>Generado el: " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "</i></p>");
+            writer.println("<h1>🏥 Reporte Maestro de la Clínica</h1>");
 
-            // --- TABLA DE DATOS ---
-            writer.println("<table><thead><tr>");
-            writer.println("<th>ID</th><th>Paciente</th><th>Cédula</th><th>Médico Especialista</th><th>Fecha y Hora</th><th>Estado</th>");
-            writer.println("</tr></thead><tbody>");
-
-            if (turnos.isEmpty()) {
-                writer.println("<tr><td colspan='6' style='text-align:center;'>No hay turnos registrados actualmente.</td></tr>");
-            } else {
-                for (Turno t : turnos) {
-                    writer.println("<tr>");
-                    writer.println("<td>" + t.getId() + "</td>");
-                    writer.println("<td>" + t.getPaciente().getNombre() + " " + t.getPaciente().getApellido() + "</td>");
-                    writer.println("<td>" + t.getPaciente().getCedula() + "</td>");
-                    writer.println("<td>Dr. " + t.getMedico().getNombre() + " " + t.getMedico().getApellido() + " <br><small>(" + t.getMedico().getEspecialidad() + ")</small></td>");
-                    writer.println("<td>" + t.getFechaHora().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + "</td>");
-                    // Aplicamos la clase CSS según el estado
-                    writer.println("<td><span class='status-pill " + t.getEstado() + "'>" + t.getEstado() + "</span></td>");
-                    writer.println("</tr>");
-                }
+            // --- SECCIÓN 1: PACIENTES ---
+            writer.println("<div class='card'><h2>👥 Pacientes Registrados</h2><table>");
+            writer.println("<tr><th>ID</th><th>Nombre Completo</th><th>Cédula</th><th>Teléfono</th></tr>");
+            for (Paciente p : pacientes) {
+                writer.println("<tr><td>"+p.getId()+"</td><td>"+p.getNombre()+" "+p.getApellido()+"</td><td>"+p.getCedula()+"</td><td>"+p.getTelefono()+"</td></tr>");
             }
+            writer.println("</table></div>");
 
-            writer.println("</tbody></table>");
-            writer.println("<p><b>Resumen:</b> " + turnos.size() + " turnos en total.</p>");
-            writer.println("</div></body></html>");
+            // --- SECCIÓN 2: MÉDICOS ---
+            writer.println("<div class='card'><h2>👨‍⚕️ Cuerpo Médico</h2><table>");
+            writer.println("<tr><th>ID</th><th>Nombre</th><th>Especialidad</th></tr>");
+            for (Medico m : medicos) {
+                writer.println("<tr><td>"+m.getId()+"</td><td>Dr. "+m.getNombre()+" "+m.getApellido()+"</td><td>"+m.getEspecialidad()+"</td></tr>");
+            }
+            writer.println("</table></div>");
 
-            System.out.println("\n✨ [PLUS] ¡Reporte HTML generado con éxito!");
-            System.out.println("👉 Busca el archivo 'reporte_clinica.html' en la carpeta raíz de tu proyecto.");
+            // --- SECCIÓN 3: TURNOS
+            writer.println("<div class='card'><h2>📅 Agenda de Turnos</h2><table>");
+            writer.println("<tr><th>ID</th><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Estado</th></tr>");
+            for (Turno t : turnos) {
+                writer.println("<tr><td>"+t.getId()+"</td><td>"+t.getPaciente().getNombre()+"</td><td>Dr. "+t.getMedico().getNombre()+"</td><td>"+t.getFechaHora()+"</td><td>"+t.getEstado()+"</td></tr>");
+            }
+            writer.println("</table></div>");
+
+            writer.println("</body></html>");
+            System.out.println("✅ Reporte Maestro generado: reporte_clinica_completo.html");
 
         } catch (IOException e) {
-            System.out.println("❌ Error al generar el reporte: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
